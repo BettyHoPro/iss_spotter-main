@@ -1,5 +1,6 @@
 const request = require("request");
 
+
 // === ISS Spotter I === //
 const fetchMyIP = (callback) => {
   request("https://api.ipify.org?format=json", (error, response, body) => {
@@ -12,8 +13,8 @@ const fetchMyIP = (callback) => {
       callback(Error(msg), null);
       return;
     }
-    const jsonIp = JSON.parse(body).ip;
-    callback(null, jsonIp);
+    const ip = JSON.parse(body).ip;
+    callback(null, ip);
   });
 };
 
@@ -28,7 +29,8 @@ const fetchCoordsByIP = (ip, callback) => {
     callback(null, { latitude, longitude });
   });
 };
-
+// const ip = "173.180.15.1";
+// const coords = { latitude: '49.27670', longitude: '-123.13000' };
 // === ISS Spotter III === //
 const fetchISSFlyOverTimes = (coords, callback) => {
   const url = `http://api.open-notify.org/iss-pass.json?lat=${coords.latitude}&lon=${coords.longitude}`;
@@ -42,4 +44,20 @@ const fetchISSFlyOverTimes = (coords, callback) => {
   });
 };
 
-module.exports = { fetchMyIP, fetchCoordsByIP, fetchISSFlyOverTimes };
+// === ISS Spotter IV === //
+const nextISSTimesForMyLocation = (callback) => {
+  fetchMyIP((error, ip) => {
+    if (error) return callback(error, null);
+    fetchCoordsByIP(ip, (error, loc) => {
+      if (error) return callback(error, null);
+      fetchISSFlyOverTimes(loc, (error, nextPasses) => {
+        if (error) return callback(error, null);
+        callback(null, nextPasses);
+      });
+    });
+  });
+};
+
+
+module.exports = { nextISSTimesForMyLocation };
+
